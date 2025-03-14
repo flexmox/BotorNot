@@ -5,250 +5,391 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>dtect Bot Detection Demo</title>
     <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --accent-color: #2c3e50;
+            --light-bg: #f8f9fa;
+            --border-color: #e1e4e8;
+            --text-color: #333;
+            --metrics-width: 340px;
+            --content-padding: 30px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
             line-height: 1.6;
-            color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            color: var(--text-color);
+            background-color: #f0f2f5;
         }
+        
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        
         h1 {
-            color: #2c3e50;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            font-size: 24px;
         }
+        
+        h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+        }
+        
+        /* Metrics Panel (Left Column) */
+        #metrics-container {
+            width: var(--metrics-width);
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            z-index: 100;
+        }
+        
+        /* Content Area (Right Column) */
+        #content {
+            margin-left: var(--metrics-width);
+            flex: 1;
+            padding: var(--content-padding);
+        }
+        
+        .intro {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .form-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
         .form-group {
             margin-bottom: 20px;
         }
+        
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--accent-color);
         }
+        
         input, textarea, select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
             font-size: 16px;
+            transition: border-color 0.2s;
         }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
         button {
-            background-color: #3498db;
+            background-color: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
+            padding: 12px 20px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.2s;
         }
+        
         button:hover {
-            background-color: #2980b9;
+            background-color: var(--primary-dark);
         }
+        
         #metrics {
-            margin-top: 30px;
-            background-color: #f9f9f9;
+            background-color: var(--light-bg);
             padding: 15px;
-            border-radius: 4px;
-            border: 1px solid #eee;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
         }
         .metric-group {
             margin-bottom: 20px;
+            background-color: white;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
+        
         .metric-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent-color);
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
         }
+        
         .metric-value {
             padding: 5px 10px;
             background-color: #eee;
             border-radius: 4px;
             font-family: monospace;
         }
+        
         .metric-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
+            margin-bottom: 7px;
         }
+        
         .metric-label {
-            flex: 1;
+            flex: 1.5;
+            font-size: 14px;
         }
+        
         .metric-data {
             flex: 1;
             text-align: right;
             font-family: monospace;
+            font-weight: 600;
         }
+        
         .progress-bar {
-            height: 20px;
+            height: 10px;
             background-color: #ecf0f1;
             border-radius: 10px;
             margin-top: 5px;
+            margin-bottom: 10px;
             overflow: hidden;
         }
+        
         .progress-bar-fill {
             height: 100%;
-            background-color: #3498db;
+            background-color: var(--primary-color);
             border-radius: 10px;
             transition: width 0.3s ease;
         }
+        
         .high-score {
             background-color: #e74c3c;
         }
+        
         .medium-score {
             background-color: #f39c12;
         }
+        
         .low-score {
             background-color: #2ecc71;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            #metrics-container {
+                position: relative;
+                width: 100%;
+                height: auto;
+                max-height: 50vh;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            #content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+        
+        /* For very small screens */
+        @media (max-width: 576px) {
+            :root {
+                --content-padding: 15px;
+            }
+            
+            .intro, .form-container {
+                padding: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>dtect Bot Detection Demo</h1>
-    <p>This demo shows how the dtect bot detection SDK analyzes user behavior to determine if interactions are more bot-like or human-like. Interact with the form below to see the metrics update in real-time.</p>
-    
-    <div class="form-group">
-        <label for="name">Name:</label>
-        <input type="text" id="name" placeholder="Enter your name">
-    </div>
-    
-    <div class="form-group">
-        <label for="email">Email:</label>
-        <input type="email" id="email" placeholder="Enter your email">
-    </div>
-    
-    <div class="form-group">
-        <label for="message">Message:</label>
-        <textarea id="message" rows="4" placeholder="Type your message here"></textarea>
-    </div>
-    
-    <div class="form-group">
-        <label for="country">Country:</label>
-        <select id="country">
-            <option value="">Select your country</option>
-            <option value="us">United States</option>
-            <option value="ca">Canada</option>
-            <option value="uk">United Kingdom</option>
-            <option value="au">Australia</option>
-            <option value="other">Other</option>
-        </select>
-    </div>
-    
-    <button type="submit" id="submit-btn">Submit</button>
-    
-    <div id="metrics">
-        <h2>Bot Detection Metrics</h2>
-        
-        <div class="metric-group">
-            <div class="metric-title">Overall Bot Score</div>
-            <div class="metric-row">
-                <div class="metric-label">Score (higher = more bot-like):</div>
-                <div class="metric-data" id="bot-score">0.00</div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-bar-fill" id="bot-score-bar" style="width: 0%"></div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Confidence:</div>
-                <div class="metric-data" id="confidence">0.00</div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-bar-fill" id="confidence-bar" style="width: 0%"></div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Total Interactions:</div>
-                <div class="metric-data" id="interactions">0</div>
+    <div class="container">
+        <!-- Metrics Panel (Left) -->
+        <div id="metrics-container">
+            <h2>Bot Detection Metrics</h2>
+            <div id="metrics">
+                <div class="metric-group">
+                    <div class="metric-title">Overall Bot Score</div>
+                    <div class="metric-row">
+                        <div class="metric-label">Score (higher = more bot-like):</div>
+                        <div class="metric-data" id="bot-score">0.00</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="bot-score-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Confidence:</div>
+                        <div class="metric-data" id="confidence">0.00</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="confidence-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Total Interactions:</div>
+                        <div class="metric-data" id="interactions">0</div>
+                    </div>
+                </div>
+                
+                <div class="metric-group">
+                    <div class="metric-title">Typing Behavior</div>
+                    <div class="metric-row">
+                        <div class="metric-label">WPM (Words Per Minute):</div>
+                        <div class="metric-data" id="typing-wpm">0.00</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Consistency (higher = more consistent):</div>
+                        <div class="metric-data" id="typing-consistency">0.00</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Samples:</div>
+                        <div class="metric-data" id="typing-samples">0</div>
+                    </div>
+                </div>
+                
+                <div class="metric-group">
+                    <div class="metric-title">Click Behavior</div>
+                    <div class="metric-row">
+                        <div class="metric-label">Speed (ms between clicks):</div>
+                        <div class="metric-data" id="click-speed">0.00</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Pattern Score (higher = more suspicious):</div>
+                        <div class="metric-data" id="click-pattern">0.00</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Samples:</div>
+                        <div class="metric-data" id="click-samples">0</div>
+                    </div>
+                </div>
+                
+                <div class="metric-group">
+                    <div class="metric-title">Mouse Movement</div>
+                    <div class="metric-row">
+                        <div class="metric-label">Speed (pixels/ms):</div>
+                        <div class="metric-data" id="movement-speed">0.00</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Straightness (1.0 = perfectly straight):</div>
+                        <div class="metric-data" id="movement-straightness">0.00</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Naturalness (higher = more human-like):</div>
+                        <div class="metric-data" id="movement-naturalness">0.00</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Samples:</div>
+                        <div class="metric-data" id="movement-samples">0</div>
+                    </div>
+                </div>
+                
+                <div class="metric-group">
+                    <div class="metric-title">Tab Switching</div>
+                    <div class="metric-row">
+                        <div class="metric-label">Frequency (switches/minute):</div>
+                        <div class="metric-data" id="tab-frequency">0.00</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Samples:</div>
+                        <div class="metric-data" id="tab-samples">0</div>
+                    </div>
+                </div>
+                
+                <div class="metric-group">
+                    <div class="metric-title">Copy/Paste Behavior</div>
+                    <div class="metric-row">
+                        <div class="metric-label">Total Copy/Paste Actions:</div>
+                        <div class="metric-data" id="cp-count">0</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">External Content Pastes:</div>
+                        <div class="metric-data" id="cp-external">0</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Avg Time Between Copy & Paste (ms):</div>
+                        <div class="metric-data" id="cp-time">0</div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Suspicious Score:</div>
+                        <div class="metric-data" id="cp-score">0.00</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-bar-fill" id="cp-score-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label">Samples:</div>
+                        <div class="metric-data" id="cp-samples">0</div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="metric-group">
-            <div class="metric-title">Typing Behavior</div>
-            <div class="metric-row">
-                <div class="metric-label">WPM (Words Per Minute):</div>
-                <div class="metric-data" id="typing-wpm">0.00</div>
+        <!-- Content Area (Right) -->
+        <div id="content">
+            <div class="intro">
+                <h1>dtect Bot Detection Demo</h1>
+                <p>This demo shows how the dtect bot detection SDK analyzes user behavior to determine if interactions are more bot-like or human-like. Interact with the form below to see the metrics update in real-time.</p>
             </div>
-            <div class="metric-row">
-                <div class="metric-label">Consistency (higher = more consistent):</div>
-                <div class="metric-data" id="typing-consistency">0.00</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Samples:</div>
-                <div class="metric-data" id="typing-samples">0</div>
-            </div>
-        </div>
-        
-        <div class="metric-group">
-            <div class="metric-title">Click Behavior</div>
-            <div class="metric-row">
-                <div class="metric-label">Speed (ms between clicks):</div>
-                <div class="metric-data" id="click-speed">0.00</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Pattern Score (higher = more suspicious):</div>
-                <div class="metric-data" id="click-pattern">0.00</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Samples:</div>
-                <div class="metric-data" id="click-samples">0</div>
-            </div>
-        </div>
-        
-        <div class="metric-group">
-            <div class="metric-title">Mouse Movement</div>
-            <div class="metric-row">
-                <div class="metric-label">Speed (pixels/ms):</div>
-                <div class="metric-data" id="movement-speed">0.00</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Straightness (1.0 = perfectly straight):</div>
-                <div class="metric-data" id="movement-straightness">0.00</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Naturalness (higher = more human-like):</div>
-                <div class="metric-data" id="movement-naturalness">0.00</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Samples:</div>
-                <div class="metric-data" id="movement-samples">0</div>
-            </div>
-        </div>
-        
-        <div class="metric-group">
-            <div class="metric-title">Tab Switching</div>
-            <div class="metric-row">
-                <div class="metric-label">Frequency (switches/minute):</div>
-                <div class="metric-data" id="tab-frequency">0.00</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Samples:</div>
-                <div class="metric-data" id="tab-samples">0</div>
-            </div>
-        </div>
-        
-        <div class="metric-group">
-            <div class="metric-title">Copy/Paste Behavior</div>
-            <div class="metric-row">
-                <div class="metric-label">Total Copy/Paste Actions:</div>
-                <div class="metric-data" id="cp-count">0</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">External Content Pastes:</div>
-                <div class="metric-data" id="cp-external">0</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Avg Time Between Copy & Paste (ms):</div>
-                <div class="metric-data" id="cp-time">0</div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Suspicious Score:</div>
-                <div class="metric-data" id="cp-score">0.00</div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-bar-fill" id="cp-score-bar" style="width: 0%"></div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-label">Samples:</div>
-                <div class="metric-data" id="cp-samples">0</div>
+            
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" placeholder="Enter your name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Message:</label>
+                    <textarea id="message" rows="4" placeholder="Type your message here"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="country">Country:</label>
+                    <select id="country">
+                        <option value="">Select your country</option>
+                        <option value="us">United States</option>
+                        <option value="ca">Canada</option>
+                        <option value="uk">United Kingdom</option>
+                        <option value="au">Australia</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <button type="submit" id="submit-btn">Submit</button>
             </div>
         </div>
     </div>
