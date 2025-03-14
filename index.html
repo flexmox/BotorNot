@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dtect Bot Detection Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #metrics {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        .metric-group {
+            margin-bottom: 20px;
+        }
+        .metric-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        .metric-value {
+            padding: 5px 10px;
+            background-color: #eee;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        .metric-label {
+            flex: 1;
+        }
+        .metric-data {
+            flex: 1;
+            text-align: right;
+            font-family: monospace;
+        }
+        .progress-bar {
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        .high-score {
+            background-color: #e74c3c;
+        }
+        .medium-score {
+            background-color: #f39c12;
+        }
+        .low-score {
+            background-color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+    <h1>dtect Bot Detection Demo</h1>
+    <p>This demo shows how the dtect bot detection SDK analyzes user behavior to determine if interactions are more bot-like or human-like. Interact with the form below to see the metrics update in real-time.</p>
+    
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" placeholder="Enter your name">
+    </div>
+    
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" placeholder="Enter your email">
+    </div>
+    
+    <div class="form-group">
+        <label for="message">Message:</label>
+        <textarea id="message" rows="4" placeholder="Type your message here"></textarea>
+    </div>
+    
+    <div class="form-group">
+        <label for="country">Country:</label>
+        <select id="country">
+            <option value="">Select your country</option>
+            <option value="us">United States</option>
+            <option value="ca">Canada</option>
+            <option value="uk">United Kingdom</option>
+            <option value="au">Australia</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
+    
+    <button type="submit" id="submit-btn">Submit</button>
+    
+    <div id="metrics">
+        <h2>Bot Detection Metrics</h2>
+        
+        <div class="metric-group">
+            <div class="metric-title">Overall Bot Score</div>
+            <div class="metric-row">
+                <div class="metric-label">Score (higher = more bot-like):</div>
+                <div class="metric-data" id="bot-score">0.00</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="bot-score-bar" style="width: 0%"></div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Confidence:</div>
+                <div class="metric-data" id="confidence">0.00</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="confidence-bar" style="width: 0%"></div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Total Interactions:</div>
+                <div class="metric-data" id="interactions">0</div>
+            </div>
+        </div>
+        
+        <div class="metric-group">
+            <div class="metric-title">Typing Behavior</div>
+            <div class="metric-row">
+                <div class="metric-label">WPM (Words Per Minute):</div>
+                <div class="metric-data" id="typing-wpm">0.00</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Consistency (higher = more consistent):</div>
+                <div class="metric-data" id="typing-consistency">0.00</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Samples:</div>
+                <div class="metric-data" id="typing-samples">0</div>
+            </div>
+        </div>
+        
+        <div class="metric-group">
+            <div class="metric-title">Click Behavior</div>
+            <div class="metric-row">
+                <div class="metric-label">Speed (ms between clicks):</div>
+                <div class="metric-data" id="click-speed">0.00</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Pattern Score (higher = more suspicious):</div>
+                <div class="metric-data" id="click-pattern">0.00</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Samples:</div>
+                <div class="metric-data" id="click-samples">0</div>
+            </div>
+        </div>
+        
+        <div class="metric-group">
+            <div class="metric-title">Mouse Movement</div>
+            <div class="metric-row">
+                <div class="metric-label">Speed (pixels/ms):</div>
+                <div class="metric-data" id="movement-speed">0.00</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Straightness (1.0 = perfectly straight):</div>
+                <div class="metric-data" id="movement-straightness">0.00</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Naturalness (higher = more human-like):</div>
+                <div class="metric-data" id="movement-naturalness">0.00</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Samples:</div>
+                <div class="metric-data" id="movement-samples">0</div>
+            </div>
+        </div>
+        
+        <div class="metric-group">
+            <div class="metric-title">Tab Switching</div>
+            <div class="metric-row">
+                <div class="metric-label">Frequency (switches/minute):</div>
+                <div class="metric-data" id="tab-frequency">0.00</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Samples:</div>
+                <div class="metric-data" id="tab-samples">0</div>
+            </div>
+        </div>
+        
+        <div class="metric-group">
+            <div class="metric-title">Copy/Paste Behavior</div>
+            <div class="metric-row">
+                <div class="metric-label">Total Copy/Paste Actions:</div>
+                <div class="metric-data" id="cp-count">0</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">External Content Pastes:</div>
+                <div class="metric-data" id="cp-external">0</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Avg Time Between Copy & Paste (ms):</div>
+                <div class="metric-data" id="cp-time">0</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Suspicious Score:</div>
+                <div class="metric-data" id="cp-score">0.00</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="cp-score-bar" style="width: 0%"></div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Samples:</div>
+                <div class="metric-data" id="cp-samples">0</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load the dtect SDK -->
+    <script src="dtect-bot-detection.js"></script>
+    
+    <script>
+        // Initialize dtect with custom config
+        window.dtect.init({
+            debugMode: true,
+            typingSpeedThreshold: 200,
+            clickSpeedThreshold: 100,
+            movementStraightnessThreshold: 0.85,
+            sensitivity: 0.7,
+            reportInterval: 1000, // Update metrics every second
+            onReport: updateMetricsDisplay,
+            onBotDetected: function(report) {
+                console.log('Bot behavior detected!', report);
+                
+                // If you want to block submission when bot is detected with high confidence
+                if (report.botScore > 0.8 && report.confidence > 0.7) {
+                    alert('Suspicious bot-like behavior detected!');
+                    return true; // Prevent form submission
+                }
+                return false; // Allow form submission
+            }
+        }).startTracking(); // Start tracking immediately
+        
+        // Handle form submission
+        document.getElementById('submit-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Generate a final report
+            const finalReport = window.dtect.generateReport();
+            
+            if (window.dtect.isBot(0.8) && finalReport.confidence > 0.7) {
+                alert('Form submission blocked: Suspicious bot-like behavior detected!');
+                return;
+            }
+            
+            // For demo purposes, just show an alert
+            alert('Form submitted successfully!');
+            
+            // For a real implementation, you would send the form data along with the report
+            // to your server for processing
+            /*
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value,
+                country: document.getElementById('country').value,
+                dtectReport: finalReport
+            };
+            
+            fetch('https://your-api.example.com/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            */
+        });
+        
+        // Update the metrics display with report data
+        function updateMetricsDisplay(report) {
+            // Update overall scores
+            document.getElementById('bot-score').textContent = report.botScore.toFixed(2);
+            document.getElementById('confidence').textContent = report.confidence.toFixed(2);
+            document.getElementById('interactions').textContent = report.interactionCount;
+            
+            // Update progress bars
+            const botScoreBar = document.getElementById('bot-score-bar');
+            botScoreBar.style.width = (report.botScore * 100) + '%';
+            
+            // Change color based on score
+            if (report.botScore > 0.7) {
+                botScoreBar.className = 'progress-bar-fill high-score';
+            } else if (report.botScore > 0.4) {
+                botScoreBar.className = 'progress-bar-fill medium-score';
+            } else {
+                botScoreBar.className = 'progress-bar-fill low-score';
+            }
+            
+            document.getElementById('confidence-bar').style.width = (report.confidence * 100) + '%';
+            
+            // Update typing metrics
+            document.getElementById('typing-wpm').textContent = report.metrics.typing.wpm.toFixed(2);
+            document.getElementById('typing-consistency').textContent = report.metrics.typing.consistency.toFixed(2);
+            document.getElementById('typing-samples').textContent = report.metrics.typing.samples;
+            
+            // Update click metrics
+            document.getElementById('click-speed').textContent = report.metrics.clicks.speed.toFixed(2);
+            document.getElementById('click-pattern').textContent = report.metrics.clicks.patternScore.toFixed(2);
+            document.getElementById('click-samples').textContent = report.metrics.clicks.samples;
+            
+            // Update movement metrics
+            document.getElementById('movement-speed').textContent = report.metrics.movement.speed.toFixed(4);
+            document.getElementById('movement-straightness').textContent = report.metrics.movement.straightness.toFixed(2);
+            document.getElementById('movement-naturalness').textContent = report.metrics.movement.naturalness.toFixed(2);
+            document.getElementById('movement-samples').textContent = report.metrics.movement.samples;
+            
+            // Update tab switching metrics
+            document.getElementById('tab-frequency').textContent = report.metrics.tabSwitching.frequency.toFixed(2);
+            document.getElementById('tab-samples').textContent = report.metrics.tabSwitching.samples;
+            
+            // Update copy/paste metrics
+            document.getElementById('cp-count').textContent = report.metrics.copyPaste.copyPasteCount;
+            document.getElementById('cp-external').textContent = report.metrics.copyPaste.externalPasteCount;
+            document.getElementById('cp-time').textContent = Math.round(report.metrics.copyPaste.averageTimeBetweenCopyPaste);
+            document.getElementById('cp-score').textContent = report.metrics.copyPaste.suspiciousScore.toFixed(2);
+            document.getElementById('cp-samples').textContent = report.metrics.copyPaste.samples;
+            
+            // Update copy/paste score bar
+            const cpScoreBar = document.getElementById('cp-score-bar');
+            cpScoreBar.style.width = (report.metrics.copyPaste.suspiciousScore * 100) + '%';
+            
+            // Change color based on score
+            if (report.metrics.copyPaste.suspiciousScore > 0.7) {
+                cpScoreBar.className = 'progress-bar-fill high-score';
+            } else if (report.metrics.copyPaste.suspiciousScore > 0.4) {
+                cpScoreBar.className = 'progress-bar-fill medium-score';
+            } else {
+                cpScoreBar.className = 'progress-bar-fill low-score';
+            }
+        }
+    </script>
+</body>
+</html>
